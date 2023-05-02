@@ -1,0 +1,76 @@
+<div class="container" fxLayout="row" fxLayoutAlign="center none">
+  <div fxFlex="95%">
+
+    <mat-card>
+      <mat-card-content>
+
+        <div class="flexBox flexBoxSpaceBetween">
+          <h2>Documents</h2>
+          <div class="flexBox">
+            <span>
+              <button disableRipple class="resetDocList" mat-mini-fab color="primary"><mat-icon>refresh</mat-icon></button>
+            </span>
+            <button mat-button mat-raised-button color="primary" [routerLink]="'/documents/create'">Create</button>
+          </div>
+        </div>
+
+        <table mat-table [dataSource]="dataSource" multiTemplateDataRows matSort>
+
+          <ng-container matColumnDef="{{column}}" *ngFor="let column of displayedColumns">
+            <th mat-header-cell *matHeaderCellDef [mat-sort-header]="column === 'name' ? column : ''" [disabled]="column!='name'"> {{column !== 'delete' ? column : '&nbsp;'}} </th>
+            <td class="parent" mat-cell *matCellDef="let element;"> {{ column !== 'delete' ? (column === 'name' ? element.name : concatChildRaws(element, column) ) : '&nbsp;' }} </td>
+          </ng-container>
+
+          <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+          <ng-container matColumnDef="expandedDetail">
+            <th mat-header-cell *matHeaderCellDef class="expandedDetail">  </th>
+            <td mat-cell *matCellDef="let element" class="child" [attr.colspan]="displayedColumns.length">
+              <div class="example-element-detail" *ngIf="element?.documents?.length" [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+                <div class="inner-table mat-elevation-z8" *ngIf="expandedElement">
+                  <table #innerTables mat-table #innerSort="matSort" [dataSource]="element?.documents" matSort>
+                      <!-- Name Column -->
+                      <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
+                        <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+                      </ng-container>
+
+                      <!-- Version Column -->
+                      <ng-container matColumnDef="version">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Version </th>
+                        <td mat-cell *matCellDef="let element"> {{element.version}} </td>
+                      </ng-container>
+
+                      <!-- Length Column -->
+                      <ng-container matColumnDef="length">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Length </th>
+                        <td mat-cell *matCellDef="let element"> {{element.length | bytes}} </td>
+                      </ng-container>
+                      <ng-container matColumnDef="delete">
+                        <th mat-header-cell *matHeaderCellDef class="deleteColumn"> Actions </th>
+                        <td class="deleteTd" mat-cell *matCellDef>
+                          <button mat-mini-fab color="warn" (click)="delete(element)">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </td>
+                      </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="detailDocument(row)"></tr>
+                  </table>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let element; columns: displayedColumns;" [class.example-element-row]="element.addresses?.data.length"
+              [class.example-expanded-row]="expandedElement === element" (click)="toggleRow(element)">
+          </tr>
+          <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+
+        </table>
+        
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+</div>
